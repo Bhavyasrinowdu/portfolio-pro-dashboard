@@ -13,37 +13,24 @@
             --text-gray: #b3b3b3;
             --border: #222;
         }
-
         * { box-sizing: border-box; font-family: 'Inter', -apple-system, sans-serif; }
         body { background-color: var(--bg-dark); color: var(--text-white); margin: 0; transition: 0.3s; }
-
-        /* Navigation */
         nav { background: #000; padding: 1rem 5%; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
         .logo { font-size: 1.5rem; font-weight: bold; }
         .nav-links a { color: var(--text-white); text-decoration: none; margin-left: 20px; font-size: 0.9rem; cursor: pointer; }
-
-        /* Login Screen */
         #login-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 90vh; }
         .login-box { background: var(--card-bg); padding: 40px; border-radius: 12px; width: 350px; text-align: center; border: 1px solid var(--border); }
         input { width: 100%; padding: 12px; margin: 10px 0; background: #1a1a1a; border: 1px solid #333; color: white; border-radius: 6px; }
-
-        /* Dashboard */
         .container { max-width: 1100px; margin: 40px auto; padding: 0 20px; }
         .welcome-section { margin-bottom: 40px; }
         .progress-container { background: #222; height: 10px; border-radius: 5px; margin-top: 10px; overflow: hidden; }
         #progress-bar { background: var(--accent-green); height: 100%; width: 0%; transition: 0.5s; }
-
-        /* Cards */
         .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; }
         .card { background: var(--card-bg); padding: 30px; border-radius: 15px; border: 1px solid var(--border); }
         .card h2 { margin-top: 0; }
-        
-        /* Task List */
         .task-list-view { display: none; }
         .task-card { background: var(--card-bg); padding: 20px; border-radius: 10px; border-left: 5px solid var(--accent-green); margin-bottom: 15px; }
         .lab-box { background: #1a1a1a; padding: 15px; border-radius: 5px; margin: 10px 0; border: 1px dashed #444; color: var(--accent-green); font-family: monospace; }
-        
-        /* Buttons */
         .btn-green { background: var(--accent-green); color: #000; border: none; padding: 12px 24px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; }
         .btn-green:hover { transform: scale(1.05); }
         .btn-complete { background: #333; color: #fff; cursor: default; }
@@ -51,7 +38,6 @@
     </style>
 </head>
 <body>
-
 <div id="login-screen">
     <div class="login-box">
         <h1>PortfolioPro</h1>
@@ -61,7 +47,6 @@
         <button class="btn-green" onclick="showDashboard()">Login</button>
     </div>
 </div>
-
 <div id="dashboard" style="display:none;">
     <nav>
         <div class="logo">PortfolioPro</div>
@@ -69,7 +54,6 @@
             <a onclick="location.reload()">Logout</a>
         </div>
     </nav>
-
     <div class="container">
         <div id="main-view">
             <div class="welcome-section">
@@ -77,7 +61,6 @@
                 <p id="stats-text">0 of 56 tasks completed (0%)</p>
                 <div class="progress-container"><div id="progress-bar"></div></div>
             </div>
-
             <div class="card-grid">
                 <div class="card">
                     <h2>Git</h2>
@@ -96,7 +79,6 @@
                 </div>
             </div>
         </div>
-
         <div id="task-view" class="task-list-view">
             <button class="back-btn" onclick="closeTasks()">← Back to Dashboard</button>
             <h1 id="view-title">Learning Path</h1>
@@ -104,8 +86,11 @@
         </div>
     </div>
 </div>
-
 <script>
+    window.onload = function() {
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('dashboard').style.display = 'none';
+}
     const taskData = {
         git: [
             { id: "g1", title: "Install Git", lab: "Download Git from git-scm.com. Run 'git --version' in CMD to verify." },
@@ -170,9 +155,7 @@
             { id: "h15", title: "Networking", lab: "Talk to mentors and other participants." }
         ]
     };
-
     let completedTasks = JSON.parse(localStorage.getItem('completedTasks')) || [];
-
     function showDashboard() {
         const user = document.getElementById('username').value || "Student";
         document.getElementById('user-display').innerText = user;
@@ -180,15 +163,12 @@
         document.getElementById('dashboard').style.display = 'block';
         updateStats();
     }
-
     function openTasks(category) {
         document.getElementById('main-view').style.display = 'none';
         document.getElementById('task-view').style.display = 'block';
         document.getElementById('view-title').innerText = category.toUpperCase() + " Learning Path";
-        
         const container = document.getElementById('task-container');
         container.innerHTML = "";
-
         taskData[category].forEach(task => {
             const isDone = completedTasks.includes(task.id);
             const card = document.createElement('div');
@@ -204,13 +184,11 @@
             container.appendChild(card);
         });
     }
-
     function closeTasks() {
         document.getElementById('main-view').style.display = 'block';
         document.getElementById('task-view').style.display = 'none';
         updateStats();
     }
-
     function toggleTask(id) {
         if (!completedTasks.includes(id)) {
             completedTasks.push(id);
@@ -224,25 +202,19 @@
         localStorage.setItem('completedTasks', JSON.stringify(completedTasks));
         updateStats();
     }
-
     function updateStats() {
         const total = 56;
         const current = completedTasks.length;
         const percent = Math.round((current / total) * 100);
-        
         document.getElementById('stats-text').innerText = `${current} of ${total} tasks completed (${percent}%)`;
         document.getElementById('progress-bar').style.width = percent + "%";
-
-        // Update card labels
         const gitDone = completedTasks.filter(id => id.startsWith('g') && !id.startsWith('gh')).length;
         const ghDone = completedTasks.filter(id => id.startsWith('gh')).length;
-        const hackDone = completedTasks.filter(id => id.startsWith('h') && !id.startsWith('h1') && !id.startsWith('h2')).length; // logic fix needed for IDs but works for demo
-        
+        const hackDone = completedTasks.filter(id => id.startsWith('h')).length;
         document.getElementById('git-count').innerText = `${gitDone}/19 tasks`;
         document.getElementById('github-count').innerText = `${ghDone}/22 tasks`;
-        document.getElementById('hackathon-count').innerText = `${completedTasks.filter(id => id.startsWith('h') && !id.startsWith('g')).length}/15 tasks`;
+        document.getElementById('hackathon-count').innerText = `${hackDone}/15 tasks`;
     }
 </script>
-
 </body>
 </html>
