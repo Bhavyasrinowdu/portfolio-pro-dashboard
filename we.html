@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PortfolioPro - Student Dashboard</title>
+    <style>
+        :root {
+            --bg-dark: #0a0a0a;
+            --card-bg: #404040;
+            --accent-green: #2ecc71;
+            --text-white: #f6f2f2;
+            --text-gray: #b3b3b3;
+            --border: #222;
+        }
+
+        * { box-sizing: border-box; font-family: 'Inter', -apple-system, sans-serif; }
+        body { background-color: var(--bg-dark); color: var(--text-white); margin: 0; transition: 0.3s; }
+
+        /* Navigation */
+        nav { background: #000; padding: 1rem 5%; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
+        .logo { font-size: 1.5rem; font-weight: bold; }
+        .nav-links a { color: var(--text-white); text-decoration: none; margin-left: 20px; font-size: 0.9rem; cursor: pointer; }
+
+        /* Login Screen */
+        #login-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 90vh; }
+        .login-box { background: var(--card-bg); padding: 40px; border-radius: 12px; width: 350px; text-align: center; border: 1px solid var(--border); }
+        input { width: 100%; padding: 12px; margin: 10px 0; background: #1a1a1a; border: 1px solid #333; color: white; border-radius: 6px; }
+
+        /* Dashboard */
+        .container { max-width: 1100px; margin: 40px auto; padding: 0 20px; }
+        .welcome-section { margin-bottom: 40px; }
+        .progress-container { background: #222; height: 10px; border-radius: 5px; margin-top: 10px; overflow: hidden; }
+        #progress-bar { background: var(--accent-green); height: 100%; width: 0%; transition: 0.5s; }
+
+        /* Cards */
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; }
+        .card { background: var(--card-bg); padding: 30px; border-radius: 15px; border: 1px solid var(--border); }
+        .card h2 { margin-top: 0; }
+        
+        /* Task List */
+        .task-list-view { display: none; }
+        .task-card { background: var(--card-bg); padding: 20px; border-radius: 10px; border-left: 5px solid var(--accent-green); margin-bottom: 15px; }
+        .lab-box { background: #1a1a1a; padding: 15px; border-radius: 5px; margin: 10px 0; border: 1px dashed #444; color: var(--accent-green); font-family: monospace; }
+        
+        /* Buttons */
+        .btn-green { background: var(--accent-green); color: #000; border: none; padding: 12px 24px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-green:hover { transform: scale(1.05); }
+        .btn-complete { background: #333; color: #fff; cursor: default; }
+        .back-btn { margin-bottom: 20px; background: none; color: var(--text-gray); border: 1px solid #444; padding: 8px 15px; border-radius: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div id="login-screen">
+    <div class="login-box">
+        <h1>PortfolioPro</h1>
+        <p style="color: var(--text-gray);">Login to track your progress</p>
+        <input type="text" id="username" placeholder="Student Roll Number">
+        <input type="password" placeholder="Password">
+        <button class="btn-green" onclick="showDashboard()">Login</button>
+    </div>
+</div>
+
+<div id="dashboard" style="display:none;">
+    <nav>
+        <div class="logo">PortfolioPro</div>
+        <div class="nav-links">
+            <a onclick="location.reload()">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div id="main-view">
+            <div class="welcome-section">
+                <h1>Welcome back, <span id="user-display">Guest</span> 👋</h1>
+                <p id="stats-text">0 of 56 tasks completed (0%)</p>
+                <div class="progress-container"><div id="progress-bar"></div></div>
+            </div>
+
+            <div class="card-grid">
+                <div class="card">
+                    <h2>Git</h2>
+                    <p id="git-count">0/19 tasks</p>
+                    <button class="btn-green" onclick="openTasks('git')">Continue →</button>
+                </div>
+                <div class="card">
+                    <h2>GitHub</h2>
+                    <p id="github-count">0/22 tasks</p>
+                    <button class="btn-green" onclick="openTasks('github')">Continue →</button>
+                </div>
+                <div class="card">
+                    <h2>Hackathons</h2>
+                    <p id="hackathon-count">0/15 tasks</p>
+                    <button class="btn-green" onclick="openTasks('hackathons')">Continue →</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="task-view" class="task-list-view">
+            <button class="back-btn" onclick="closeTasks()">← Back to Dashboard</button>
+            <h1 id="view-title">Learning Path</h1>
+            <div id="task-container"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const taskData = {
+        git: [
+            { id: "g1", title: "Install Git", lab: "Download Git from git-scm.com. Run 'git --version' in CMD to verify." },
+            { id: "g2", title: "Configure User", lab: "git config --global user.name 'Your Name' <br> git config --global user.email 'email@example.com'" },
+            { id: "g3", title: "Initialize Repo", lab: "Create a folder, open terminal inside, and run 'git init'." },
+            { id: "g4", title: "Check Status", lab: "Run 'git status' to see the state of your working directory." },
+            { id: "g5", title: "Staging Files", lab: "Create 'hello.txt' and run 'git add hello.txt' to stage it." },
+            { id: "g6", title: "First Commit", lab: "git commit -m 'Initial commit'" },
+            { id: "g7", title: "View History", lab: "Run 'git log' to see your commit history." },
+            { id: "g8", title: "Create Branch", lab: "git branch feature-login" },
+            { id: "g9", title: "Switch Branch", lab: "git checkout feature-login" },
+            { id: "g10", title: "Merging", lab: "Go back to main and run 'git merge feature-login'." },
+            { id: "g11", title: "Delete Branch", lab: "git branch -d feature-login" },
+            { id: "g12", title: "Ignoring Files", lab: "Create a '.gitignore' file and add 'node_modules/' inside." },
+            { id: "g13", title: "Undoing Changes", lab: "Use 'git restore <file>' to discard changes." },
+            { id: "g14", title: "Git Diff", lab: "Run 'git diff' to see what exactly you changed in the code." },
+            { id: "g15", title: "Stashing", lab: "Run 'git stash' to temporarily hide unfinished work." },
+            { id: "g16", title: "Amending Commits", lab: "git commit --amend -m 'Corrected message'" },
+            { id: "g17", title: "Git Reset", lab: "git reset --soft HEAD~1 (to uncommit but keep code)." },
+            { id: "g18", title: "Checking Remote", lab: "git remote -v" },
+            { id: "g19", title: "Git Help", lab: "git help <command> to learn anything on the fly." }
+        ],
+        github: [
+            { id: "gh1", title: "Create GitHub Account", lab: "Sign up at github.com using your college email." },
+            { id: "gh2", title: "Create Remote Repo", lab: "Click 'New Repository' on GitHub dashboard." },
+            { id: "gh3", title: "Link Local to Remote", lab: "git remote add origin <your-repo-url>" },
+            { id: "gh4", title: "Git Push", lab: "git push -u origin main" },
+            { id: "gh5", title: "Git Pull", lab: "Update your local code with 'git pull origin main'." },
+            { id: "gh6", title: "Forking", lab: "Find an open source project and click 'Fork'." },
+            { id: "gh7", title: "Cloning", lab: "git clone <url> to download a repo to your PC." },
+            { id: "gh8", title: "Create Pull Request", lab: "Push a branch and click 'Compare & Pull Request' on GitHub." },
+            { id: "gh9", title: "GitHub Profile Readme", lab: "Create a repo with your username and add a README.md." },
+            { id: "gh10", title: "Issues", lab: "Create an issue on your repo for a bug you found." },
+            { id: "gh11", title: "GitHub Pages", lab: "Go to Settings > Pages and host your website." },
+            { id: "gh12", title: "Markdown Basics", lab: "Use # for headers and ** for bold in your README." },
+            { id: "gh13", title: "GitHub Stars", lab: "Star your favorite repository." },
+            { id: "gh14", title: "Collaborators", lab: "Add a friend's username in Settings > Collaborators." },
+            { id: "gh15", title: "GitHub Desktop", lab: "Install GitHub Desktop for a GUI experience." },
+            { id: "gh16", title: "Project Boards", lab: "Create a Kanban board in the Projects tab." },
+            { id: "gh17", title: "Releases", lab: "Create a version tag like v1.0.0." },
+            { id: "gh18", title: "Code Search", lab: "Use GitHub search to find specific functions." },
+            { id: "gh19", title: "Gists", lab: "Create a Gist to share a small code snippet." },
+            { id: "gh20", title: "GitHub Actions", lab: "Set up a simple CI/CD workflow." },
+            { id: "gh21", title: "Insights", lab: "Check the 'Insights' tab for commit activity." },
+            { id: "gh22", title: "SSH Keys", lab: "Add an SSH key to bypass password login." }
+        ],
+        hackathons: [
+            { id: "h1", title: "Find a Hackathon", lab: "Visit Devpost.com or Unstop.com." },
+            { id: "h2", title: "Team Building", lab: "Find 2-3 teammates with different skills (UI, Backend)." },
+            { id: "h3", title: "Ideation", lab: "Use 'How Might We' questions to define a problem." },
+            { id: "h4", title: "Tech Stack", lab: "Decide: MERN? Python? Flutter? Choose before starting." },
+            { id: "h5", title: "Figma Prototype", lab: "Design basic wireframes of your app." },
+            { id: "h6", title: "MVP Definition", lab: "List only the core features needed for a demo." },
+            { id: "h7", title: "Rapid Coding", lab: "Focus on functionality first, then styling." },
+            { id: "h8", title: "API Integration", lab: "Connect your frontend to a backend or public API." },
+            { id: "h9", title: "Database Setup", lab: "Store user data in MongoDB or Firebase." },
+            { id: "h10", title: "Testing", lab: "Make sure the 'Happy Path' works without crashing." },
+            { id: "h11", title: "Presentation Video", lab: "Record a 2-minute demo using Loom." },
+            { id: "h12", title: "Project Documentation", lab: "Write a clear 'How to Run' guide in README." },
+            { id: "h13", title: "Pitching", lab: "Prepare a slide deck with Problem, Solution, Demo." },
+            { id: "h14", title: "Submission", lab: "Submit your GitHub and Video before the deadline." },
+            { id: "h15", title: "Networking", lab: "Talk to mentors and other participants." }
+        ]
+    };
+
+    let completedTasks = JSON.parse(localStorage.getItem('completedTasks')) || [];
+
+    function showDashboard() {
+        const user = document.getElementById('username').value || "Student";
+        document.getElementById('user-display').innerText = user;
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('dashboard').style.display = 'block';
+        updateStats();
+    }
+
+    function openTasks(category) {
+        document.getElementById('main-view').style.display = 'none';
+        document.getElementById('task-view').style.display = 'block';
+        document.getElementById('view-title').innerText = category.toUpperCase() + " Learning Path";
+        
+        const container = document.getElementById('task-container');
+        container.innerHTML = "";
+
+        taskData[category].forEach(task => {
+            const isDone = completedTasks.includes(task.id);
+            const card = document.createElement('div');
+            card.className = "task-card";
+            card.innerHTML = `
+                <h3>${task.title}</h3>
+                <div class="lab-box">${task.lab}</div>
+                <button id="btn-${task.id}" class="btn-green ${isDone ? 'btn-complete' : ''}" 
+                    onclick="toggleTask('${task.id}')">
+                    ${isDone ? 'Completed ✓' : 'Mark as Complete'}
+                </button>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    function closeTasks() {
+        document.getElementById('main-view').style.display = 'block';
+        document.getElementById('task-view').style.display = 'none';
+        updateStats();
+    }
+
+    function toggleTask(id) {
+        if (!completedTasks.includes(id)) {
+            completedTasks.push(id);
+            document.getElementById(`btn-${id}`).innerText = "Completed ✓";
+            document.getElementById(`btn-${id}`).classList.add('btn-complete');
+        } else {
+            completedTasks = completedTasks.filter(item => item !== id);
+            document.getElementById(`btn-${id}`).innerText = "Mark as Complete";
+            document.getElementById(`btn-${id}`).classList.remove('btn-complete');
+        }
+        localStorage.setItem('completedTasks', JSON.stringify(completedTasks));
+        updateStats();
+    }
+
+    function updateStats() {
+        const total = 56;
+        const current = completedTasks.length;
+        const percent = Math.round((current / total) * 100);
+        
+        document.getElementById('stats-text').innerText = `${current} of ${total} tasks completed (${percent}%)`;
+        document.getElementById('progress-bar').style.width = percent + "%";
+
+        // Update card labels
+        const gitDone = completedTasks.filter(id => id.startsWith('g') && !id.startsWith('gh')).length;
+        const ghDone = completedTasks.filter(id => id.startsWith('gh')).length;
+        const hackDone = completedTasks.filter(id => id.startsWith('h') && !id.startsWith('h1') && !id.startsWith('h2')).length; // logic fix needed for IDs but works for demo
+        
+        document.getElementById('git-count').innerText = `${gitDone}/19 tasks`;
+        document.getElementById('github-count').innerText = `${ghDone}/22 tasks`;
+        document.getElementById('hackathon-count').innerText = `${completedTasks.filter(id => id.startsWith('h') && !id.startsWith('g')).length}/15 tasks`;
+    }
+</script>
+
+</body>
+</html>
